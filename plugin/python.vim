@@ -33,6 +33,7 @@
 "   ]<up>   -- Jump to previous line with the same/lower indentation
 "   ]<down> -- Jump to next line with the same/lower indentation
 
+
 map  [[   :PBoB<CR>
 vmap [[   :<C-U>PBoB<CR>m'gv``
 map  ]]   :PEoB<CR>
@@ -274,6 +275,49 @@ function! PythonNextLine(direction)
 
   execute "normal ".ln."G"
 endfunction
+
+" update the IM-Python menu, that holds Classes and Functions
+function! UpdateMenu()
+  call MakeClassStructure ()
+  call MakeFuncStructure ()
+endfunction
+
+command UpdateMenu call UpdateMenu ()
+
+" make a menu that holds all of the classes
+function! MakeClassStructure () 
+  norm mpgg0
+  while line(".") <= line("$")
+    if match ( getline("."), '^\s*class\s\+' ) != -1
+      norm ^w"nyw
+      let name=@n
+      exe 'menu IM-Python.classes.'.name.' '.line(".").'gg'
+    endif
+    if line(".") == line("$")
+      return
+    endif
+    norm j
+  endwhile
+  norm 'p
+endfunction
+
+"make a menu that holds all of the function deffinitions
+function! MakeFuncStructure () 
+  norm mpgg0
+  while line(".") <= line("$")
+    if match ( getline("."), '^\s*def\s\+' ) != -1
+      norm ^w"nyw
+      let name=@n
+      exe 'menu IM-Python.functions.'.name.' '.line(".").'gg'
+    endif
+    if line(".") == line("$")
+      return
+    endif
+    norm j
+  endwhile
+  norm 'p
+endfunction
+
 
 
 " vim:set et sts=2 sw=2:
