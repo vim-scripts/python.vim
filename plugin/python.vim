@@ -1,8 +1,8 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2001/07/07
+" LAST MODIFICATION: 2001/09/05
 " (C) Copyright 2001 Mikael Berthe <mikael.berthe@efrei.fr>
-" Version: 1.1
+" Version: 1.4
 
 " USAGE:
 "
@@ -55,11 +55,14 @@ map  ]<down>  :call PythonNextLine(1)<CR>
 
 
 " Menu entries
+nmenu <silent> &Python.Update\ IM-Python\ Menu 
+    \:call UpdateMenu()<CR>
+nmenu &Python.-Sep1- :
 nmenu <silent> &Python.Beginning\ of\ Block<Tab>[[ 
     \[[
 nmenu <silent> &Python.End\ of\ Block<Tab>]] 
     \]]
-nmenu &Python.-Sep1- :
+nmenu &Python.-Sep2- :
 nmenu <silent> &Python.Shift\ Block\ Left<Tab>]< 
     \]<
 vmenu <silent> &Python.Shift\ Block\ Left<Tab>]< 
@@ -68,7 +71,7 @@ nmenu <silent> &Python.Shift\ Block\ Right<Tab>]>
     \]>
 vmenu <silent> &Python.Shift\ Block\ Right<Tab>]> 
     \]>
-nmenu &Python.-Sep2- :
+nmenu &Python.-Sep3- :
 vmenu <silent> &Python.Comment\ Selection 
     \:call PythonCommentSelection()<CR>
 nmenu <silent> &Python.Comment\ Selection 
@@ -77,7 +80,7 @@ vmenu <silent> &Python.Uncomment\ Selection
     \:call PythonUncommentSelection()<CR>
 nmenu <silent> &Python.Uncomment\ Selection 
     \:call PythonUncommentSelection()<CR>
-nmenu &Python.-Sep3- :
+nmenu &Python.-Sep4- :
 nmenu <silent> &Python.Previous\ Class 
     \:call PythonDec("class", -1)<CR>
 nmenu <silent> &Python.Next\ Class 
@@ -86,14 +89,14 @@ nmenu <silent> &Python.Previous\ Function
     \:call PythonDec("function", -1)<CR>
 nmenu <silent> &Python.Next\ Function 
     \:call PythonDec("function", 1)<CR>
-nmenu &Python.-Sep4- :
+nmenu &Python.-Sep5- :
 nmenu <silent> &Python.Select\ Block<Tab>]v 
     \]v
 nmenu <silent> &Python.Select\ Function<Tab>]f 
     \]f
 nmenu <silent> &Python.Select\ Class<Tab>]c 
     \]c
-nmenu &Python.-Sep5- :
+nmenu &Python.-Sep6- :
 nmenu <silent> &Python.Previous\ Line\ wrt\ indent<Tab>]<up> 
     \]<up>
 nmenu <silent> &Python.Next\ Line\ wrt\ indent<Tab>]<down> 
@@ -102,7 +105,7 @@ nmenu <silent> &Python.Next\ Line\ wrt\ indent<Tab>]<down>
 
 :com! PBoB execute "normal ".PythonBoB(line('.'), -1, 1)."G"
 :com! PEoB execute "normal ".PythonBoB(line('.'), 1, 1)."G"
-
+:com! UpdateMenu call UpdateMenu()
 
 
 " Go to a block boundary (-1: previous, 1: next)
@@ -276,13 +279,14 @@ function! PythonNextLine(direction)
   execute "normal ".ln."G"
 endfunction
 
+
 " update the IM-Python menu, that holds Classes and Functions
 function! UpdateMenu()
+  let cline=line('.')
   call MakeClassStructure ()
   call MakeFuncStructure ()
+  execute "normal ".cline."Gzz"
 endfunction
-
-command UpdateMenu call UpdateMenu ()
 
 " make a menu that holds all of the classes
 function! MakeClassStructure () 
@@ -301,7 +305,7 @@ function! MakeClassStructure ()
   norm 'p
 endfunction
 
-"make a menu that holds all of the function deffinitions
+" make a menu that holds all of the function definitions
 function! MakeFuncStructure () 
   norm mpgg0
   while line(".") <= line("$")
