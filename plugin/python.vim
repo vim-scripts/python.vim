@@ -2,15 +2,20 @@
 " FILE: python.vim
 " LAST MODIFICATION: 2001/07/07
 " (C) Copyright 2001 Mikael Berthe <mikael.berthe@efrei.fr>
-" Version: 1.0
+" Version: 1.1
 
 " USAGE:
 "
 " Juste source this script when editing Python files.
 " Example: au FileType python source ~me/.vim/scripts/python.vim
-" You can set the global variable "g:select_heading_comment" to 0
-" if you don't want to select comments preceding a declaration
-" Example: (in your .vimrc) "let g:select_heading_comment = 0"
+" You can set the global variable "g:py_select_leading_comments" to 0
+" if you don't want to select comments preceding a declaration (these
+" are usually the description of the function/class).
+" You can set the global variable "g:py_select_trailing_comments" to 0
+" if you don't want to select comments at the end of a function/class.
+" If these variables are not defined, both leading and trailing comments
+" are selected.
+" Example: (in your .vimrc) "let g:py_select_leading_comments = 0"
 " You may want to take a look at the 'shiftwidth' option for the
 " shift commands...
 "
@@ -35,9 +40,9 @@ vmap ]]   :<C-U>PEoB<CR>m'gv``
 
 map  ]v   [[V]]
 map  ]<   [[V]]<
-vmap  ]<  <
+vmap ]<   <
 map  ]>   [[V]]>
-vmap  ]>  >
+vmap ]>   >
 
 map  ]c   :call PythonSelectObject("class")<CR>
 map  ]f   :call PythonSelectObject("function")<CR>
@@ -94,30 +99,40 @@ nmenu <silent> &Python.Next\ Line\ wrt\ indent<Tab>]<down>
     \]<down>
 
 
-:com! PBoB execute "normal ".PythonBoB(line('.'), -1)."G"
-:com! PEoB execute "normal ".PythonBoB(line('.'), 1)."G"
+:com! PBoB execute "normal ".PythonBoB(line('.'), -1, 1)."G"
+:com! PEoB execute "normal ".PythonBoB(line('.'), 1, 1)."G"
 
 
 
 " Go to a block boundary (-1: previous, 1: next)
-function! PythonBoB(line, direction)
+" If force_sel_comments is true, 'g:py_select_trailing_comments' is ignored
+function! PythonBoB(line, direction, force_sel_comments)
   let ln = a:line
   let ind = indent(ln)
   let mark = ln
   let indent_valid = strlen(getline(ln))
   let ln = ln + a:direction
+  if (a:direction == 1) && (!a:force_sel_comments) && 
+      \ exists("g:py_select_trailing_comments") && 
+      \ (!g:py_select_trailing_comments)
+    let sel_comments = 0
+  else
+    let sel_comments = 1
+  endif
 
   while((ln >= 1) && (ln <= line('$')))
-    if (!indent_valid)
-      let indent_valid = strlen(getline(ln))
-      let ind = indent(ln)
-      let mark = ln
-    else
-      if (strlen(getline(ln)))
-        if (indent(ln) < ind)
-          break
-        endif
+    if  (sel_comments) || (match(getline(ln), "^\\s*#") == -1)
+      if (!indent_valid)
+        let indent_valid = strlen(getline(ln))
+        let ind = indent(ln)
         let mark = ln
+      else
+        if (strlen(getline(ln)))
+          if (indent(ln) < ind)
+            break
+          endif
+          let mark = ln
+        endif
       endif
     endif
     let ln = ln + a:direction
@@ -199,7 +214,7 @@ function! PythonSelectObject(obj)
   call PythonDec(a:obj, -1)
   let beg = line('.')
 
-  if !exists("g:select_heading_comment") || (g:select_heading_comment)
+  if !exists("g:py_select_leading_comments") || (g:py_select_leading_comments)
     let decind = indent(beg)
     let cl = beg
     while (cl>1)
@@ -231,7 +246,7 @@ function! PythonSelectObject(obj)
     normal j
     let cl = line('.')
     execute ":".beg
-    execute "normal V".PythonBoB(cl, 1)."G"
+    execute "normal V".PythonBoB(cl, 1, 0)."G"
   endif
 endfunction
 
