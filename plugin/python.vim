@@ -1,8 +1,8 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2003/06/12 08:19
+" LAST MODIFICATION: 2003/07/25 19:00
 " (C) Copyright 2001-2003 Mikael Berthe <mikael.b@netcourrier.com>
-" Version: 1.6
+" Version: 1.7
 
 " USAGE:
 "
@@ -191,7 +191,7 @@ function! PythonCommentSelection()  range
     if strlen(getline(cl))
       execute "normal ".ind."|i".commentString
     endif
-    execute "normal j"
+    execute "normal \<Down>"
     let cl = cl + 1
   endwhile
 endfunction
@@ -247,7 +247,7 @@ function! PythonSelectObject(obj)
     execute "normal V".cl."G"
   else
     " Select the whole block
-    normal j
+    execute "normal \<Down>"
     let cl = line('.')
     execute ":".beg
     execute "normal V".PythonBoB(cl, 1, 0)."G"
