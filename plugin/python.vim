@@ -1,8 +1,8 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2003/01/16 10:30
-" (C) Copyright 2001 Mikael Berthe <mikael.b@netcourrier.com>
-" Version: 1.5
+" LAST MODIFICATION: 2003/06/12 08:19
+" (C) Copyright 2001-2003 Mikael Berthe <mikael.b@netcourrier.com>
+" Version: 1.6
 
 " USAGE:
 "
@@ -280,22 +280,26 @@ function! PythonNextLine(direction)
 endfunction
 
 
-" update the IM-Python menu, that holds Classes and Functions
+" Update the IM-Python menu, that holds Classes and Functions
 function! UpdateMenu()
+  let restore_fe = &foldenable
+  set nofoldenable
   let cline=line('.')
   call MakeClassStructure ()
   call MakeFuncStructure ()
   execute "normal ".cline."Gzz"
+  let &foldenable = restore_fe
 endfunction
 
-" make a menu that holds all of the classes
+" Make a menu that holds all of the classes
 function! MakeClassStructure () 
   norm mpgg0
   while line(".") <= line("$")
     if match ( getline("."), '^\s*class\s\+' ) != -1
       norm ^w"nyw
       let name=@n
-      exe 'menu IM-Python.classes.'.name.' '.line(".").'gg'
+      "exe 'menu IM-Python.classes.'.name.' '.line(".").'gg15zo'
+      exe 'menu IM-Python.classes.'.name.' :call <SID>JumpToAndUnfold('.line(".").')<CR>'
     endif
     if line(".") == line("$")
       return
@@ -305,14 +309,15 @@ function! MakeClassStructure ()
   norm 'p
 endfunction
 
-" make a menu that holds all of the function definitions
+" Make a menu that holds all of the function definitions
 function! MakeFuncStructure () 
   norm mpgg0
   while line(".") <= line("$")
     if match ( getline("."), '^\s*def\s\+' ) != -1
       norm ^w"nyw
       let name=@n
-      exe 'menu IM-Python.functions.'.name.' '.line(".").'gg'
+      "exe 'menu IM-Python.functions.'.name.' '.line(".").'gg15zo'
+      exe 'menu IM-Python.functions.'.name.' :call <SID>JumpToAndUnfold('.line(".").')<CR>'
     endif
     if line(".") == line("$")
       return
@@ -322,6 +327,26 @@ function! MakeFuncStructure ()
   norm 'p
 endfunction
 
+function! s:JumpToAndUnfold(line)
+  " Go to the right line
+  execute 'normal '.a:line.'gg'
+  " Check to see if we are in a fold
+  let lvl = foldlevel(a:line)
+  if lvl != 0
+    " and if so, then expand the fold out, other wise, ignore this part.
+    execute 'normal 15zo'
+  endif
+endfunction
+
+"" This one will work only on vim 6.2 because of the try/catch expressions.
+" function! s:JumpToAndUnfoldWithExceptions(line)
+"  try 
+"    execute 'normal '.a:line.'gg15zo'
+"  catch /^Vim\((\a\+)\)\=:E490:/
+"    " Do nothing, just consume the error
+"  endtry
+"endfunction
 
 
 " vim:set et sts=2 sw=2:
+
