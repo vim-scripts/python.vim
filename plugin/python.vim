@@ -1,12 +1,12 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2001/09/05
-" (C) Copyright 2001 Mikael Berthe <mikael.berthe@efrei.fr>
-" Version: 1.4
+" LAST MODIFICATION: 2003/01/16 10:30
+" (C) Copyright 2001 Mikael Berthe <mikael.b@netcourrier.com>
+" Version: 1.5
 
 " USAGE:
 "
-" Juste source this script when editing Python files.
+" Just source this script when editing Python files.
 " Example: au FileType python source ~me/.vim/scripts/python.vim
 " You can set the global variable "g:py_select_leading_comments" to 0
 " if you don't want to select comments preceding a declaration (these
@@ -20,7 +20,7 @@
 " shift commands...
 "
 " REQUIREMENTS:
-" vim (>= 600)
+" vim (>= 6)
 "
 " Shortcuts:
 "   [[      -- Jump to beginning of block
