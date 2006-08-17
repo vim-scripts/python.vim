@@ -1,8 +1,8 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2003/07/25 19:00
-" (C) Copyright 2001-2003 Mikael Berthe <mikael.b@netcourrier.com>
-" Version: 1.7
+" LAST MODIFICATION: 2006-08-18 07:30
+" (C) Copyright 2001-2005 Mikael Berthe <bmikael@lists.lilotux.net>
+" Version: 1.8
 
 " USAGE:
 "
@@ -279,53 +279,116 @@ function! PythonNextLine(direction)
   execute "normal ".ln."G"
 endfunction
 
-
-" Update the IM-Python menu, that holds Classes and Functions
 function! UpdateMenu()
+  " delete menu if it already exists, then rebuild it.
+  " this is necessary in case you've got multiple buffers open
+  " a future enhancement to this would be to make the menu aware of
+  " all buffers currently open, and group classes and functions by buffer
+  if exists("g:menuran")
+    aunmenu IM-Python
+  else
+    let g:menuran=1
+  endif
   let restore_fe = &foldenable
   set nofoldenable
+  " preserve disposition of window and cursor
   let cline=line('.')
-  call MakeClassStructure ()
-  call MakeFuncStructure ()
-  execute "normal ".cline."Gzz"
+  let ccol=col('.') - 1
+  norm H
+  let hline=line('.')
+  " create the menu
+  call MenuBuilder()
+  " restore disposition of window and cursor
+  exe "norm ".hline."Gzt"
+  let dnscroll=cline-hline
+  exe "norm ".dnscroll."j".ccol."l"
   let &foldenable = restore_fe
 endfunction
 
-" Make a menu that holds all of the classes
-function! MakeClassStructure () 
-  norm mpgg0
-  while line(".") <= line("$")
-    if match ( getline("."), '^\s*class\s\+' ) != -1
-      norm ^w"nyw
-      let name=@n
-      "exe 'menu IM-Python.classes.'.name.' '.line(".").'gg15zo'
-      exe 'menu IM-Python.classes.'.name.' :call <SID>JumpToAndUnfold('.line(".").')<CR>'
-    endif
-    if line(".") == line("$")
-      return
-    endif
+function! MenuBuilder()
+  norm gg0
+  let currentclass = -1
+  let classlist = []
+  let parentclass = ""
+  while line(".") < line("$")
+    " search for a class or function
+    if match ( getline("."), '^\s*class\s\+[a-zA-Z].*:\|^\s*def\s\+[a-zA-Z].*:' ) != -1
+      norm ^
+      let linenum = line('.')
+      let indentcol = col('.')
+      norm "nye
+      let classordef=@n
+      norm w"nywge
+      let objname=@n
+      let parentclass = FindParentClass(classlist, indentcol)
+      if classordef == "class"
+        call AddClass(objname, linenum, parentclass)
+      else " this is a function
+        call AddFunction(objname, linenum, parentclass)
+      endif
+      call RebuildClassList(classlist, [objname, indentcol], classordef)
+    endif " line matched
     norm j
   endwhile
-  norm 'p
 endfunction
 
-" Make a menu that holds all of the function definitions
-function! MakeFuncStructure () 
-  norm mpgg0
-  while line(".") <= line("$")
-    if match ( getline("."), '^\s*def\s\+' ) != -1
-      norm ^w"nyw
-      let name=@n
-      "exe 'menu IM-Python.functions.'.name.' '.line(".").'gg15zo'
-      exe 'menu IM-Python.functions.'.name.' :call <SID>JumpToAndUnfold('.line(".").')<CR>'
+" classlist contains the list of nested classes we are in.
+" in most cases it will be empty or contain a single class
+" but where a class is nested within another, it will contain 2 or more
+" this function adds or removes classes from the list based on indentation
+function! RebuildClassList(classlist, newclass, classordef)
+  let i = len(a:classlist) - 1
+  while i > -1
+    if a:newclass[1] <= a:classlist[i][1]
+      call remove(a:classlist, i)
     endif
-    if line(".") == line("$")
-      return
-    endif
-    norm j
+    let i = i - 1
   endwhile
-  norm 'p
+  if a:classordef == "class"
+    call add(a:classlist, a:newclass)
+  endif
 endfunction
+
+" we found a class or function, determine its parent class based on
+" indentation and what's contained in classlist
+function! FindParentClass(classlist, indentcol)
+  let i = 0
+  let parentclass = ""
+  while i < len(a:classlist)
+    if a:indentcol <= a:classlist[i][1]
+      break
+    else
+      if len(parentclass) == 0
+        let parentclass = a:classlist[i][0]
+      else
+        let parentclass = parentclass.'\.'.a:classlist[i][0]
+      endif
+    endif
+    let i = i + 1
+  endwhile
+  return parentclass
+endfunction
+
+" add a class to the menu
+function! AddClass(classname, lineno, parentclass)
+  if len(a:parentclass) > 0
+    let classstring = a:parentclass.'\.'.a:classname
+  else
+    let classstring = a:classname
+  endif
+  exe 'menu IM-Python.classes.'.classstring.' :call <SID>JumpToAndUnfold('.a:lineno.')<CR>'
+endfunction
+
+" add a function to the menu, grouped by member class
+function! AddFunction(functionname, lineno, parentclass)
+  if len(a:parentclass) > 0
+    let funcstring = a:parentclass.'.'.a:functionname
+  else
+    let funcstring = a:functionname
+  endif
+  exe 'menu IM-Python.functions.'.funcstring.' :call <SID>JumpToAndUnfold('.a:lineno.')<CR>'
+endfunction
+
 
 function! s:JumpToAndUnfold(line)
   " Go to the right line
