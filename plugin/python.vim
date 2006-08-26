@@ -2,7 +2,7 @@
 " FILE: python.vim
 " LAST MODIFICATION: 2006-08-18 07:30
 " (C) Copyright 2001-2005 Mikael Berthe <bmikael@lists.lilotux.net>
-" Version: 1.8
+" Version: 1.9
 
 " USAGE:
 "
@@ -312,7 +312,7 @@ function! MenuBuilder()
   let parentclass = ""
   while line(".") < line("$")
     " search for a class or function
-    if match ( getline("."), '^\s*class\s\+[a-zA-Z].*:\|^\s*def\s\+[a-zA-Z].*:' ) != -1
+    if match ( getline("."), '^\s*class\s\+[_a-zA-Z].*:\|^\s*def\s\+[_a-zA-Z].*:' ) != -1
       norm ^
       let linenum = line('.')
       let indentcol = col('.')
