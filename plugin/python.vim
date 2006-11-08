@@ -1,8 +1,8 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2006-08-18 07:30
+" LAST MODIFICATION: 2006-11-07 4:29pm
 " (C) Copyright 2001-2005 Mikael Berthe <bmikael@lists.lilotux.net>
-" Version: 1.9
+" Version: 1.10
 
 " USAGE:
 "
@@ -20,7 +20,7 @@
 " shift commands...
 "
 " REQUIREMENTS:
-" vim (>= 6)
+" vim (>= 7)
 "
 " Shortcuts:
 "   [[      -- Jump to beginning of block
@@ -28,6 +28,8 @@
 "   ]v      -- Select (Visual Line Mode) block
 "   ]<      -- Shift block to left
 "   ]>      -- Shift block to right
+"   ]#      -- Comment selection
+"   ]u      -- Uncomment selection
 "   ]c      -- Select current/previous class
 "   ]f      -- Select current/previous function
 "   ]<up>   -- Jump to previous line with the same/lower indentation
@@ -44,6 +46,11 @@ map  ]<   [[V]]<
 vmap ]<   <
 map  ]>   [[V]]>
 vmap ]>   >
+
+map  ]#   :call PythonCommentSelection()<CR>
+vmap ]#   :call PythonCommentSelection()<CR>
+map  ]u   :call PythonUncommentSelection()<CR>
+vmap ]u   :call PythonUncommentSelection()<CR>
 
 map  ]c   :call PythonSelectObject("class")<CR>
 map  ]f   :call PythonSelectObject("function")<CR>
@@ -72,14 +79,14 @@ nmenu <silent> &Python.Shift\ Block\ Right<Tab>]>
 vmenu <silent> &Python.Shift\ Block\ Right<Tab>]> 
     \]>
 nmenu &Python.-Sep3- :
-vmenu <silent> &Python.Comment\ Selection 
-    \:call PythonCommentSelection()<CR>
-nmenu <silent> &Python.Comment\ Selection 
-    \:call PythonCommentSelection()<CR>
-vmenu <silent> &Python.Uncomment\ Selection 
-    \:call PythonUncommentSelection()<CR>
-nmenu <silent> &Python.Uncomment\ Selection 
-    \:call PythonUncommentSelection()<CR>
+vmenu <silent> &Python.Comment\ Selection<Tab>]# 
+    \]#
+nmenu <silent> &Python.Comment\ Selection<Tab>]# 
+    \]#
+vmenu <silent> &Python.Uncomment\ Selection<Tab>]u 
+    \]u
+nmenu <silent> &Python.Uncomment\ Selection<Tab>]u 
+    \]u
 nmenu &Python.-Sep4- :
 nmenu <silent> &Python.Previous\ Class 
     \:call PythonDec("class", -1)<CR>
