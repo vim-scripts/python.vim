@@ -1,8 +1,8 @@
 " -*- vim -*-
 " FILE: python.vim
-" LAST MODIFICATION: 2006-11-07 4:29pm
+" LAST MODIFICATION: 2006-11-29 4:09pm
 " (C) Copyright 2001-2005 Mikael Berthe <bmikael@lists.lilotux.net>
-" Version: 1.10
+" Version: 1.11
 
 " USAGE:
 "
@@ -59,6 +59,22 @@ map  ]<up>    :call PythonNextLine(-1)<CR>
 map  ]<down>  :call PythonNextLine(1)<CR>
 " You may prefer use <s-up> and <s-down>... :-)
 
+" jump to previous class
+map  ]J   :call PythonDec("class", -1)<CR>
+vmap ]J   :call PythonDec("class", -1)<CR>
+
+" jump to next class
+map  ]j   :call PythonDec("class", 1)<CR>
+vmap ]j   :call PythonDec("class", 1)<CR>
+
+" jump to previous function
+map  ]F   :call PythonDec("function", -1)<CR>
+vmap ]F   :call PythonDec("function", -1)<CR>
+
+" jump to next function
+map  ]f   :call PythonDec("function", 1)<CR>
+vmap ]f   :call PythonDec("function", 1)<CR>
+
 
 
 " Menu entries
@@ -88,14 +104,14 @@ vmenu <silent> &Python.Uncomment\ Selection<Tab>]u
 nmenu <silent> &Python.Uncomment\ Selection<Tab>]u 
     \]u
 nmenu &Python.-Sep4- :
-nmenu <silent> &Python.Previous\ Class 
-    \:call PythonDec("class", -1)<CR>
-nmenu <silent> &Python.Next\ Class 
-    \:call PythonDec("class", 1)<CR>
-nmenu <silent> &Python.Previous\ Function 
-    \:call PythonDec("function", -1)<CR>
-nmenu <silent> &Python.Next\ Function 
-    \:call PythonDec("function", 1)<CR>
+nmenu <silent> &Python.Previous\ Class<Tab>]J 
+    \]J
+nmenu <silent> &Python.Next\ Class<Tab>]j 
+    \]j
+nmenu <silent> &Python.Previous\ Function<Tab>]F 
+    \]F
+nmenu <silent> &Python.Next\ Function<Tab>]f 
+    \]f
 nmenu &Python.-Sep5- :
 nmenu <silent> &Python.Select\ Block<Tab>]v 
     \]v
