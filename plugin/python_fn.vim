@@ -183,7 +183,7 @@ function! PythonDec(obj, direction)
     let objregexp = "^\\s*class\\s\\+[a-zA-Z0-9_]\\+"
         \ . "\\s*\\((\\([a-zA-Z0-9_,. \\t\\n]\\)*)\\)\\=\\s*:"
   else
-    let objregexp = "^\\s*def\\s\\+[a-zA-Z0-9_]\\+\\s*(\\_[^:#]*)\\s*:"
+    let objregexp = "^\\s*\\(async def\\|def\\)\\s\\+[a-zA-Z0-9_]\\+\\s*(\\_[^:#]*)\\s*:"
   endif
   let flag = "W"
   if (a:direction == -1)
@@ -266,7 +266,7 @@ function! PythonSelectObject(obj)
     let eod = "\\(^\\s*class\\s\\+[a-zA-Z0-9_]\\+\\s*"
             \ . "\\((\\([a-zA-Z0-9_,. \\t\\n]\\)*)\\)\\=\\s*\\)\\@<=:"
   else
-   let eod = "\\(^\\s*def\\s\\+[a-zA-Z0-9_]\\+\\s*(\\_[^:#]*)\\s*\\)\\@<=:"
+   let eod = "\\(^\\s*\\(async def\\|def\\)\\s\\+[a-zA-Z0-9_]\\+\\s*(\\_[^:#]*)\\s*\\)\\@<=:"
   endif
   " Look for the end of the declaration (not always the same line!)
   call search(eod, "")
@@ -341,7 +341,7 @@ function! MenuBuilder()
   let parentclass = ""
   while line(".") < line("$")
     " search for a class or function
-    if match ( getline("."), '^\s*class\s\+[_a-zA-Z].*\|^\s*def\s\+[_a-zA-Z].*' ) != -1
+    if match ( getline("."), '^\s*class\s\+[_a-zA-Z].*\|^\s*\(async def\|def\)\s\+[_a-zA-Z].*' ) != -1
       norm ^
       let linenum = line('.')
       let indentcol = col('.')
@@ -434,7 +434,7 @@ endfunction
 
 "" This one will work only on vim 6.2 because of the try/catch expressions.
 " function! s:JumpToAndUnfoldWithExceptions(line)
-"  try 
+"  try
 "    execute 'normal '.a:line.'gg15zo'
 "  catch /^Vim\((\a\+)\)\=:E490:/
 "    " Do nothing, just consume the error
